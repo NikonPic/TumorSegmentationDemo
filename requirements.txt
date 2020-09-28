@@ -1,0 +1,9 @@
+pyradiomics
+fastai
+pydot
+pandas
+numpy
+matplotlib
+sklearn
+datetime
+tqdm
