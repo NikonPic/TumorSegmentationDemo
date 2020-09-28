@@ -7,6 +7,9 @@ from sklearn.metrics import accuracy_score, auc
 from fastai.metrics import roc_curve
 import matplotlib.pyplot as plt
 import os
+from PIL import Image
+import nrrd
+from radiomics import featureextractor
 
 if os.getcwd().__contains__('src'):
     from categories import make_categories_advanced
@@ -22,6 +25,7 @@ np.random.seed(SEED)
 F_KEY = 'FileName (png)'
 CLASS_KEY = 'Aggressiv/Nicht-aggressiv'
 ENTITY_KEY = 'Tumor.Entitaet'
+
 
 def get_advanced_dis_df(df, mode=False):
     """
@@ -116,49 +120,6 @@ def plot_roc_curve(interp, indx=1, lw=2, off=0.02):
     plt.ylabel('True Positive Rate')
     plt.title('Receiver operating characteristic')
     plt.legend(loc="lower right")
-
-
-def dis_df(df):
-    """
-    Distribute the dataframe into:
-    - Training
-    - Validation
-    - Test
-    """
-    # get fixed randomness
-    np.random.seed(SEED)
-    # get the shuffled indexes
-    len_all = len(df)
-    idx_list = np.array(list(range(len_all)))
-    np.random.shuffle(idx_list)
-
-    # calculate the lengths
-    valid_len = int(len_all * VALID_PART)
-    test_len = int(len_all * TEST_PART)
-    testval_len = valid_len + test_len
-    train_len = len_all - testval_len
-
-    # get the active indexes for each dataset
-    train_idx = range(testval_len, len_all)
-    valid_idx = range(test_len, testval_len)
-    test_idx = range(test_len)
-
-    # summarize in dictionary
-    dis = {
-        'train': {
-            'len': train_len,
-            'idx': idx_list[train_idx]
-        },
-        'valid': {
-            'len': valid_len,
-            'idx': idx_list[valid_idx]
-        },
-        'test': {
-            'len': test_len,
-            'idx': idx_list[test_idx]
-        }
-    }
-    return dis
 
 
 def get_df_paths():
@@ -290,3 +251,90 @@ def apply_cat(train, valid, test, dis, new_name, new_cat):
     valid[new_name] = [new_cat[idx] for idx in valid_idx]
     test[new_name] = [new_cat[idx] for idx in test_idx]
     return train, valid, test
+
+
+def png2nrrd(pic_path, nrrd_path):
+    """generate nrrd files from png files"""
+    for file in tqdm(os.listdir(pic_path)):
+        if file.endswith('.png'):
+            filename = f'{pic_path}/{file}'
+            # task
+            img = np.array(Image.open(filename))
+            sh = img.shape
+            img = img.reshape((sh[2], sh[1], sh[0]))
+            # save
+            nrrd.write(f'{nrrd_path}/{file[:-4]}.nrrd', img)
+
+
+def get_radiomics_from_df(df, paths):
+    """perform radiomics analysis for all modes"""
+    # get the shuffled indexes
+    dis = get_advanced_dis_df(df)
+
+    for mode in ['test', 'train', 'valid']:
+
+        # get the active indices
+        indices = dis[mode]['idx']
+
+        # make empty coco_dict
+        radiomics_extract(df, mode, indices)
+
+
+def radiomics_extract(df, mode, idxs, path_img='./Images_nrrd', path_seg='../radiomics/label'):
+    """contains the radiomics feature extraction"""
+
+    set_path = '../radiomics/pyradiomics_settings.yaml'
+    extractor = featureextractor.RadiomicsFeatureExtractor(set_path)
+    df_list = []
+    except_dict = {
+        'idx': [],
+    }
+
+    for idx in tqdm(idxs):
+        # get current filename
+        o = df.iloc[idx]
+        file = o[F_KEY]
+
+        # get the two relevant paths for image and segmentation
+        picpath = f'{path_img}/{file}.nrrd'
+        nrrdpath = f'{path_seg}/{file}.nrrd'
+
+        print(picpath)
+        print(nrrdpath)
+
+        # obtain result
+        result = extractor.execute(picpath, nrrdpath)
+
+        # compress
+        df_loc = result2compresdf(result)
+        # append the label
+        df_loc['label1'] = o[CLASS_KEY]
+        df_loc['label2'] = o[ENTITY_KEY]
+
+        df_list.append(df_loc.copy())
+
+    df_rad = df_list[0]
+    df_except = pd.DataFrame.from_dict(except_dict, orient='index')
+
+    for i, df_loc in enumerate(df_list):
+        if i > 0:
+            df_rad = df_rad.append(df_loc)
+
+    # finnaly save result
+    df_rad.to_csv(f'../radiomics/{mode}.csv')
+    df_except.to_csv(f'../radiomics/{mode}-except.csv')
+
+
+def result2compresdf(result: dict):
+    """compress the result to maintain the relevant features only"""
+    comp_res = {}
+
+    for key in result.keys():
+        val = result[key]
+
+        if type(val) in [np.ndarray]:
+            comp_res[key] = float(val)
+
+    df = pd.DataFrame.from_dict(comp_res, orient='index')
+
+    return df.T
