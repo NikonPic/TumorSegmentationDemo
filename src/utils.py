@@ -97,19 +97,15 @@ def calculate_age(born, diag):
 
 
 def get_acc(interp):
-    """
-    get the accuracy of the current interp set, using scipy
-    """
+    """get the accuracy of the current interp set, using scipy"""
     return accuracy_score(interp.y_true, interp.pred_class)
 
 
 def plot_roc_curve(interp, indx=1, lw=2, off=0.02):
-    """
-    draw the roc curve
-    """
+    """draw the roc curve"""
     x, y = roc_curve(interp.preds[:, indx], interp.y_true)
     auc_v = auc(x, y)
-    plt.figure("roc-curve", figsize=(8,8))
+    plt.figure("roc-curve", figsize=(8, 8))
     plt.plot(x, y, color='darkorange',
              label='ROC curve (area = %0.2f)' % auc_v)
     plt.grid(0.25)
@@ -123,9 +119,7 @@ def plot_roc_curve(interp, indx=1, lw=2, off=0.02):
 
 
 def get_df_paths():
-    """
-    collect dataframe and all relevant paths:
-    """
+    """collect dataframe and all relevant paths:"""
     # get working directory path
     path = os.getcwd()
 
@@ -151,9 +145,7 @@ def get_df_paths():
 def get_df_dis(df, born_key='OrTBoard_Patient.GBDAT', diag_key='Erstdiagnosedatum',
                t_key='Tumor.Entitaet', pos_key='Befundlokalisation', out=True,
                mode=False):
-    """
-    extract ages and other information from df
-    """
+    """extract ages and other information from df"""
 
     # get ages
     if mode:
@@ -193,9 +185,7 @@ def get_df_dis(df, born_key='OrTBoard_Patient.GBDAT', diag_key='Erstdiagnosedatu
 
 
 def print_info(ages, labels, fm, active_idx, tumor_kind, position, nums=1):
-    """
-    summarize all informations as a print message
-    """
+    """summarize all informations as a print message"""
 
     age = np.array([ages[i] for i in active_idx]).mean().round(nums)
     age_std = np.array([ages[i]

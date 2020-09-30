@@ -11,3 +11,8 @@
 * **01_pyradiomics_feature_extraction.ipynb** -> Use this file to transform all Images to nrrd format and extract the features using pyradiomics.
 * **02_feature_classification.ipynb** -> This file contains all training and validation results of the pyradiomics classification models.
 
+## Architecture
+![image](./results/architecture.png)
+
+## Results
+![image](./results/roc_curves.png)
