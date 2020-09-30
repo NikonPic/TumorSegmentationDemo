@@ -109,7 +109,7 @@ def plot_roc_curve(interp, indx=1, lw=2, off=0.02):
     """
     x, y = roc_curve(interp.preds[:, indx], interp.y_true)
     auc_v = auc(x, y)
-    plt.figure("roc-curve")
+    plt.figure("roc-curve", figsize=(8,8))
     plt.plot(x, y, color='darkorange',
              label='ROC curve (area = %0.2f)' % auc_v)
     plt.grid(0.25)
