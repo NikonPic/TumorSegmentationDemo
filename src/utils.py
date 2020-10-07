@@ -12,9 +12,9 @@ import nrrd
 from radiomics import featureextractor
 
 if os.getcwd().__contains__('src'):
-    from categories import make_categories_advanced
+    from categories import make_categories_advanced, reverse_cat_list
 else:
-    from .categories import make_categories_advanced
+    from .categories import make_categories_advanced, reverse_cat_list
 
 VALID_PART = 0.15
 TEST_PART = 0.15
@@ -40,7 +40,7 @@ def get_advanced_dis_df(df, mode=False):
     test_idx = []
 
     # get the categories by which to split
-    cats = set(df[ENTITY_KEY])
+    cats = reverse_cat_list
 
     for cat in cats:
         # get all matching df entries
@@ -270,10 +270,10 @@ def get_radiomics_from_df(df, paths):
         radiomics_extract(df, mode, indices)
 
 
-def radiomics_extract(df, mode, idxs, path_img='./Images_nrrd', path_seg='../radiomics/label'):
+def radiomics_extract(df, mode, idxs, path_img='../Images_nrrd', path_seg='../label'):
     """contains the radiomics feature extraction"""
 
-    set_path = '../radiomics/pyradiomics_settings.yaml'
+    set_path = './pyradiomics_settings.yaml'
     extractor = featureextractor.RadiomicsFeatureExtractor(set_path)
     df_list = []
     except_dict = {

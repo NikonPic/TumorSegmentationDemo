@@ -2,3 +2,6 @@ __pycache__
 datainfo.csv
 .ipynb_checkpoints
 tree.dot
+Images_nrrd
+label
+missed_malign

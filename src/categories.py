@@ -127,3 +127,22 @@ def make_categories_advanced(simple=True, yolo=False):
         "Dysplasie, fibröse": 16,
     }
     return cat_list, cat_mapping
+
+reverse_cat_list = [
+    "Knochenzyste, aneurysmatische",
+    "Enchondrom",
+    "Dysplasie, fibröse",
+    "Knochenzyste, solitär",
+    "Osteochondrom",
+    "NHL vom B-Zell-Typ",
+    "Plasmozytom / Multiples Myelom",
+    "Ewing-Sarkom",
+    "NOF",
+    "Chordom",
+    "Chondroblastom",
+    "Osteosarkom",
+    "Hämangiom",
+    "Chondrosarkom",
+    "Osteoidosteom",
+    "Riesenzelltumor",
+]
