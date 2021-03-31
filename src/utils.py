@@ -1,3 +1,5 @@
+
+# %%
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -142,6 +144,30 @@ def get_df_paths():
     return df, paths
 
 
+def get_df_paths_external():
+    """collect dataframe and all relevant paths:"""
+    # get working directory path
+    path = os.getcwd()
+
+    add = "../" if path[-3:] == "src" else ""
+
+    name = 'datainfo_external.xlsx'
+    pic_folder = 'Images'
+    seg_folder = 'Segmentations'
+
+    # get all releevant paths
+    paths = {
+        "xlsx": os.path.join(path, f'{add}{name}'),
+        "pic": os.path.join(path, f'{add}{pic_folder}'),
+        "seg": os.path.join(path, f'{add}{seg_folder}'),
+    }
+
+    # get df
+    df = pd.read_excel(paths["xlsx"])
+
+    return df, paths
+
+
 def get_df_dis(df, born_key='OrTBoard_Patient.GBDAT', diag_key='Erstdiagnosedatum',
                t_key='Tumor.Entitaet', pos_key='Befundlokalisation', out=True,
                mode=False):
@@ -256,12 +282,13 @@ def png2nrrd(pic_path, nrrd_path):
             nrrd.write(f'{nrrd_path}/{file[:-4]}.nrrd', img)
 
 
-def get_radiomics_from_df(df, paths):
+def get_radiomics_from_df(df, paths, mode=False):
     """perform radiomics analysis for all modes"""
     # get the shuffled indexes
-    dis = get_advanced_dis_df(df)
 
-    for mode in ['test', 'train', 'valid']:
+    dis = get_advanced_dis_df(df, mode=mode)
+
+    for mode in dis.keys():
 
         # get the active indices
         indices = dis[mode]['idx']
@@ -273,7 +300,7 @@ def get_radiomics_from_df(df, paths):
 def radiomics_extract(df, mode, idxs, path_img='../Images_nrrd', path_seg='../label'):
     """contains the radiomics feature extraction"""
 
-    set_path = './pyradiomics_settings.yaml'
+    set_path = '../pyradiomics_settings.yaml'
     extractor = featureextractor.RadiomicsFeatureExtractor(set_path)
     df_list = []
     except_dict = {
@@ -328,3 +355,13 @@ def result2compresdf(result: dict):
     df = pd.DataFrame.from_dict(comp_res, orient='index')
 
     return df.T
+
+
+# %%
+if __name__ == '__main__':
+    # Get the dataframe and all relevant paths
+    df, paths = get_df_paths_external()
+
+    # Evaluate wth pyradiomics
+    get_radiomics_from_df(df, paths, mode=True)
+# %%

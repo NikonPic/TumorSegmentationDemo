@@ -1,5 +1,6 @@
 __pycache__
 datainfo.csv
+datainfo_external.xlsx
 .ipynb_checkpoints
 tree.dot
 Images_nrrd
