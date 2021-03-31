@@ -1,3 +1,5 @@
+
+# %%
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -143,6 +145,33 @@ def get_df_paths():
     return df, paths
 
 
+<<<<<<< HEAD
+=======
+def get_df_paths_external():
+    """collect dataframe and all relevant paths:"""
+    # get working directory path
+    path = os.getcwd()
+
+    add = "../" if path[-3:] == "src" else ""
+
+    name = 'datainfo_external.xlsx'
+    pic_folder = 'Images'
+    seg_folder = 'Segmentations'
+
+    # get all releevant paths
+    paths = {
+        "xlsx": os.path.join(path, f'{add}{name}'),
+        "pic": os.path.join(path, f'{add}{pic_folder}'),
+        "seg": os.path.join(path, f'{add}{seg_folder}'),
+    }
+
+    # get df
+    df = pd.read_excel(paths["xlsx"])
+
+    return df, paths
+
+
+>>>>>>> 699502a9bb52b4591cea77fe6ebc310c03d8db99
 def get_df_dis(df, born_key='OrTBoard_Patient.GBDAT', diag_key='Erstdiagnosedatum',
                t_key='Tumor.Entitaet', pos_key='Befundlokalisation', out=True,
                mode=False):
@@ -386,3 +415,12 @@ def plot_confusion_matrix(
     )
     plt.show()
     return fig
+
+# %%
+if __name__ == '__main__':
+    # Get the dataframe and all relevant paths
+    df, paths = get_df_paths_external()
+
+    # Evaluate wth pyradiomics
+    get_radiomics_from_df(df, paths, mode=True)
+# %%
