@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from datetime import date
+import itertools
 from tqdm import tqdm
 from sklearn.metrics import accuracy_score, auc
 from fastai.metrics import roc_curve
@@ -328,3 +329,60 @@ def result2compresdf(result: dict):
     df = pd.DataFrame.from_dict(comp_res, orient='index')
 
     return df.T
+
+def plot_confusion_matrix(
+    conf_mat, target_names, title="Confusion matrix", cmap=None, normalize=False, font=16
+):
+    """
+    Citiation
+    ---------
+    http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
+
+    """
+    accuracy = np.trace(conf_mat) / float(np.sum(conf_mat))
+    misclass = 1 - accuracy
+
+    if cmap is None:
+        cmap = plt.get_cmap("Blues")
+
+    fig = plt.figure(figsize=(16, 16))
+    plt.imshow(conf_mat, interpolation="nearest", cmap=cmap)
+    plt.title(title, fontsize=font)
+    # plt.colorbar()
+
+    if target_names is not None:
+        tick_marks = np.arange(len(target_names))
+        plt.xticks(tick_marks, target_names, rotation=90, fontsize=font)
+        plt.yticks(tick_marks, target_names, fontsize=font)
+
+    if normalize:
+        conf_mat = conf_mat.astype(
+            "float") / conf_mat.sum(axis=1)[:, np.newaxis]
+
+    thresh = conf_mat.max() / 1.5 if normalize else conf_mat.max() / 2
+    for i, j in itertools.product(range(conf_mat.shape[0]), range(conf_mat.shape[1])):
+        if normalize:
+            plt.text(
+                j,
+                i,
+                "{:0.4f}".format(conf_mat[i, j]),
+                horizontalalignment="center",
+                color="white" if conf_mat[i, j] > thresh else "black", fontsize=font
+            )
+        else:
+            plt.text(
+                j,
+                i,
+                "{:,}".format(conf_mat[i, j]),
+                horizontalalignment="center",
+                color="white" if conf_mat[i, j] > thresh else "black", fontsize=font
+            )
+
+    # plt.tight_layout()
+    plt.ylabel("Histopathology as standard of reference", fontsize=font)
+    plt.xlabel(
+        "Predicted label\naccuracy={:0.4f}; misclass={:0.4f}".format(
+            accuracy, misclass), fontsize=font
+    )
+    plt.show()
+    return fig
