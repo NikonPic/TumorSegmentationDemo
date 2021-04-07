@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-__pycache__
-datainfo.csv
-.ipynb_checkpoints
-tree.dot
-Images_nrrd
-label
-=======
 __pycache__
 datainfo.csv
 datainfo_external.xlsx
@@ -13,5 +5,4 @@ datainfo_external.xlsx
 tree.dot
 Images_nrrd
 label
->>>>>>> 699502a9bb52b4591cea77fe6ebc310c03d8db99
 missed_malign

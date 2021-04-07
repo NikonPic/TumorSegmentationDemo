@@ -98,7 +98,6 @@ def calculate_age(born, diag):
     diag = datetime.strptime(diag, "%d.%m.%Y").date()
     return diag.year - born.year - ((diag.month, diag.day) < (born.month, born.day))
 
-
 def get_acc(interp):
     """get the accuracy of the current interp set, using scipy"""
     return accuracy_score(interp.y_true, interp.pred_class)
@@ -121,7 +120,7 @@ def plot_roc_curve(interp, indx=1, lw=2, off=0.02):
     plt.legend(loc="lower right")
 
 
-def get_df_paths():
+def get_df_paths(mode=False):
     """collect dataframe and all relevant paths:"""
     # get working directory path
     path = os.getcwd()
@@ -142,11 +141,12 @@ def get_df_paths():
     # get df
     df = pd.read_csv(paths["csv"], header='infer', delimiter=';')
 
+    if mode:
+        df = pd.read_excel(os.path.join(path, f'{add}datainfo_external.xlsx'))
+
     return df, paths
 
 
-<<<<<<< HEAD
-=======
 def get_df_paths_external():
     """collect dataframe and all relevant paths:"""
     # get working directory path
@@ -171,7 +171,6 @@ def get_df_paths_external():
     return df, paths
 
 
->>>>>>> 699502a9bb52b4591cea77fe6ebc310c03d8db99
 def get_df_dis(df, born_key='OrTBoard_Patient.GBDAT', diag_key='Erstdiagnosedatum',
                t_key='Tumor.Entitaet', pos_key='Befundlokalisation', out=True,
                mode=False):
@@ -272,6 +271,11 @@ def apply_cat(train, valid, test, dis, new_name, new_cat):
     test[new_name] = [new_cat[idx] for idx in test_idx]
     return train, valid, test
 
+def apply_cat_ext(test_external, dis_ex, new_name, new_cat):
+    test_idx = dis_ex['test_external']['idx']
+    test_external[new_name] = [new_cat[idx] for idx in test_idx]
+    return test_external
+
 
 def png2nrrd(pic_path, nrrd_path):
     """generate nrrd files from png files"""
@@ -286,18 +290,18 @@ def png2nrrd(pic_path, nrrd_path):
             nrrd.write(f'{nrrd_path}/{file[:-4]}.nrrd', img)
 
 
-def get_radiomics_from_df(df, paths):
+def get_radiomics_from_df(df, mode):
     """perform radiomics analysis for all modes"""
     # get the shuffled indexes
     dis = get_advanced_dis_df(df)
 
-    for mode in ['test', 'train', 'valid']:
+    for loc_mode in dis.keys():
 
         # get the active indices
-        indices = dis[mode]['idx']
+        indices = dis[loc_mode]['idx']
 
         # make empty coco_dict
-        radiomics_extract(df, mode, indices)
+        radiomics_extract(df, loc_mode, indices)
 
 
 def radiomics_extract(df, mode, idxs, path_img='../Images_nrrd', path_seg='../label'):
